@@ -13,18 +13,19 @@ from summarizer.llm_summarizer import Summarizer
 from scheduler import UpdateScheduler
 from ui.sidebar import SidebarWindow
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler(
-            os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "ai-sidebar", "app.log"),
-            encoding="utf-8",
-        ),
-    ],
-)
 logger = logging.getLogger(__name__)
+
+
+def _setup_logging(log_dir: Path) -> None:
+    log_dir.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler(log_dir / "app.log", encoding="utf-8"),
+        ],
+    )
 
 
 def create_default_fetchers(config: Config) -> list:
@@ -66,6 +67,9 @@ def main():
     appdata = os.environ.get("APPDATA", os.path.expanduser("~"))
     data_dir = Path(appdata) / "ai-sidebar"
     data_dir.mkdir(parents=True, exist_ok=True)
+
+    # 初始化日志
+    _setup_logging(data_dir)
 
     # 加载配置
     config = load_config()

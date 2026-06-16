@@ -18,16 +18,23 @@ def build_summary_prompt(item: Item) -> str:
 class Summarizer:
     def __init__(self, config: Config):
         self.config = config
+        self._client: AsyncOpenAI | None = None
 
     @property
     def enabled(self) -> bool:
         return self.config.enable_summary and bool(self.config.api_key.strip())
 
+    def _get_client(self) -> AsyncOpenAI:
+        if self._client is None:
+            self._client = AsyncOpenAI(
+                api_key=self.config.api_key,
+                base_url="https://api.deepseek.com/v1",
+                timeout=30.0,
+            )
+        return self._client
+
     async def summarize_item(self, item: Item) -> str:
-        client = AsyncOpenAI(
-            api_key=self.config.api_key,
-            base_url="https://api.deepseek.com/v1",
-        )
+        client = self._get_client()
         try:
             response = await client.chat.completions.create(
                 model=self.config.model,

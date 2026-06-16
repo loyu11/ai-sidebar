@@ -1,5 +1,4 @@
 import datetime
-from email.utils import parsedate_to_datetime
 from typing import Optional
 import httpx
 import feedparser
@@ -41,7 +40,6 @@ class RssFetcher(Fetcher):
                 continue
             if db.exists_by_url(item.url):
                 continue
-            item.fetched_at = now
             new_items.append(item)
         return new_items
 
