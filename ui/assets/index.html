@@ -1,0 +1,108 @@
+<!-- ai-sidebar/ui/assets/index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <span class="logo">🔔 AI 信息看板</span>
+    <span class="spacer"></span>
+    <span class="last-update" id="lastUpdate">正在加载…</span>
+  </div>
+  <div id="content">
+    <!-- JS 动态填充 -->
+  </div>
+  <div id="footer">
+    <span id="statusText">共 0 条</span>
+  </div>
+</div>
+<div id="tooltip" class="tooltip-hidden"></div>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script>
+  // QWebChannel 通信桥接
+  var backend = null;
+  new QWebChannel(qt.webChannelTransport, function(channel) {
+    backend = channel.objects.backend;
+    loadCards();
+  });
+
+  function loadCards() {
+    if (!backend) { setTimeout(loadCards, 100); return; }
+    backend.getItemsJson(function(json) {
+      var data = JSON.parse(json);
+      renderCards(data);
+    });
+  }
+
+  function renderCards(data) {
+    var content = document.getElementById('content');
+    var groups = {};
+    data.forEach(function(item) {
+      var label = item.category_label || item.category;
+      if (!groups[label]) groups[label] = [];
+      groups[label].push(item);
+    });
+    var html = '';
+    for (var cat in groups) {
+      html += '<div class="category-group">';
+      html += '<div class="category-header" onclick="toggleCategory(this)">';
+      html += '<span class="arrow">▼</span> 📌 ' + cat;
+      html += '<span class="count">' + groups[cat].length + '</span>';
+      html += '</div>';
+      html += '<div class="category-items">';
+      groups[cat].forEach(function(item) {
+        html += '<div class="card" data-id="' + item.id + '" data-url="' + item.url + '">';
+        html += '<div class="card-title">' + escapeHtml(item.title) + '</div>';
+        html += '<div class="card-meta">' + item.source + ' · ' + item.relative_time + '</div>';
+        html += '<div class="card-summary">' + (item.summary ? escapeHtml(item.summary) : '加载中…') + '</div>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    }
+    content.innerHTML = html;
+    // 绑定悬停事件
+    bindCardHover();
+    document.getElementById('footer').innerHTML =
+      '<span>🔄 ' + new Date().toLocaleTimeString('zh-CN') + ' 更新 · 共 ' + data.length + ' 条</span>';
+  }
+
+  function bindCardHover() {
+    var cards = document.querySelectorAll('.card');
+    cards.forEach(function(card) {
+      card.addEventListener('mouseenter', function(e) {
+        var summary = this.querySelector('.card-summary');
+        if (summary && summary.textContent.trim()) {
+          summary.classList.add('visible');
+        }
+      });
+      card.addEventListener('mouseleave', function(e) {
+        var summary = this.querySelector('.card-summary');
+        if (summary) summary.classList.remove('visible');
+      });
+    });
+  }
+
+  function toggleCategory(header) {
+    var items = header.nextElementSibling;
+    var arrow = header.querySelector('.arrow');
+    if (items.style.display === 'none') {
+      items.style.display = 'block';
+      arrow.textContent = '▼';
+    } else {
+      items.style.display = 'none';
+      arrow.textContent = '▶';
+    }
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+</script>
+</body>
+</html>

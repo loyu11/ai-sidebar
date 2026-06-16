@@ -1,0 +1,164 @@
+/* ai-sidebar/ui/assets/style.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 13px;
+  color: #e0e0e0;
+  background: transparent;
+  user-select: none;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 0;
+}
+
+#header {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px 12px 0 0;
+  -webkit-app-region: drag;
+}
+
+.logo {
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.last-update {
+  font-size: 11px;
+  color: #999;
+}
+
+#content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+#content::-webkit-scrollbar {
+  width: 4px;
+}
+
+#content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
+}
+
+.category-group {
+  margin-bottom: 12px;
+}
+
+.category-header {
+  padding: 6px 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.count {
+  margin-left: auto;
+  font-size: 11px;
+  color: #666;
+  background: rgba(255,255,255,0.08);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.category-items {
+  /* 默认展开 */
+}
+
+.card {
+  padding: 8px 10px;
+  margin: 3px 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.card-title {
+  font-size: 13px;
+  color: #eee;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-meta {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.card-summary {
+  display: none;
+  position: absolute;
+  left: 105%;
+  top: 0;
+  width: 240px;
+  padding: 10px 12px;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #ccc;
+  line-height: 1.6;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.card-summary.visible {
+  display: block;
+}
+
+.card:last-child .card-summary {
+  top: auto;
+  bottom: 0;
+}
+
+.tooltip-hidden {
+  display: none;
+}
+
+#footer {
+  padding: 8px 14px;
+  font-size: 11px;
+  color: #777;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0 0 12px 12px;
+  text-align: center;
+}
