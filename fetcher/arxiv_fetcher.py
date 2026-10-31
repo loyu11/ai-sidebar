@@ -8,7 +8,7 @@ from storage.db import Database
 
 
 ARXIV_CATEGORIES = ["cs.AI", "cs.CL", "cs.LG", "cs.CV"]
-ARXIV_API_BASE = "http://export.arxiv.org/api/query"
+ARXIV_API_BASE = "https://export.arxiv.org/api/query"
 ATOM_NS = "{http://www.w3.org/2005/Atom}"
 
 

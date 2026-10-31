@@ -1,9 +1,10 @@
 # ai-sidebar/ui/sidebar.py
 import json
 import logging
+import sys
 from pathlib import Path
-from PySide6.QtCore import Qt, QTimer, QObject, Slot
-from PySide6.QtGui import QScreen
+from PySide6.QtCore import Qt, QTimer, QObject, Slot, QUrl
+from PySide6.QtGui import QScreen, QDesktopServices
 from PySide6.QtWidgets import QApplication, QMainWindow, QSystemTrayIcon, QMenu
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWebChannel import QWebChannel
@@ -14,7 +15,16 @@ from scheduler import UpdateScheduler
 
 logger = logging.getLogger(__name__)
 
-ASSETS_DIR = Path(__file__).parent / "assets"
+
+def _get_assets_dir() -> Path:
+    """获取资源目录（兼容 PyInstaller 打包）。"""
+    if getattr(sys, "frozen", False):
+        # PyInstaller 打包后，资源在 _MEIPASS 下
+        return Path(sys._MEIPASS) / "ui" / "assets"  # noqa: SLF001
+    return Path(__file__).parent / "assets"
+
+
+ASSETS_DIR = _get_assets_dir()
 
 
 class Backend(QObject):
@@ -24,6 +34,11 @@ class Backend(QObject):
         super().__init__()
         self.db = db
         self.config = config
+
+    @Slot(str)
+    def openUrl(self, url: str):
+        """在默认浏览器中打开链接。"""
+        QDesktopServices.openUrl(QUrl(url))
 
     @Slot(str)
     def log(self, message: str):

@@ -3,7 +3,8 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
     QSlider, QCheckBox, QComboBox, QLineEdit, QGroupBox,
-    QFormLayout, QDialogButtonBox, QMessageBox,
+    QFormLayout, QDialogButtonBox, QMessageBox, QListWidget,
+    QListWidgetItem, QInputDialog,
 )
 from config import Config, save_config
 
@@ -70,6 +71,27 @@ class SettingsPanel(QDialog):
         cat_group.setLayout(cat_layout)
         layout.addWidget(cat_group)
 
+        # 自定义 RSS 源
+        rss_group = QGroupBox("📡 自定义 RSS 源")
+        rss_layout = QVBoxLayout()
+
+        self.rss_list = QListWidget()
+        self._refresh_rss_list()
+        rss_layout.addWidget(self.rss_list)
+
+        rss_btn_layout = QHBoxLayout()
+        add_btn = QPushButton("＋ 添加")
+        add_btn.clicked.connect(self._add_rss)
+        del_btn = QPushButton("✕ 删除")
+        del_btn.clicked.connect(self._del_rss)
+        rss_btn_layout.addWidget(add_btn)
+        rss_btn_layout.addWidget(del_btn)
+        rss_btn_layout.addStretch()
+        rss_layout.addLayout(rss_btn_layout)
+
+        rss_group.setLayout(rss_layout)
+        layout.addWidget(rss_group)
+
         # 外观
         appearance_group = QGroupBox("🎨 外观")
         form = QFormLayout()
@@ -124,6 +146,62 @@ class SettingsPanel(QDialog):
         buttons.accepted.connect(self._save)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+    def _refresh_rss_list(self):
+        """刷新 RSS 列表显示。"""
+        self.rss_list.clear()
+        for entry in self.config.custom_rss:
+            name = entry.get("name", "")
+            url = entry.get("url", "")
+            cat = entry.get("category", "ai_industry")
+            cat_label = "AI 产业" if cat == "ai_industry" else "大新闻"
+            text = f"{name}  →  {url}  [{cat_label}]"
+            item = QListWidgetItem(text)
+            item.setData(Qt.ItemDataRole.UserRole, entry)
+            self.rss_list.addItem(item)
+
+    def _add_rss(self):
+        """弹出添加 RSS 对话框。"""
+        import re
+
+        # 名称
+        name, ok = QInputDialog.getText(self, "添加 RSS 源", "名称（如：某科技博客）：")
+        if not ok or not name.strip():
+            return
+
+        # URL
+        url, ok = QInputDialog.getText(self, "添加 RSS 源", "RSS 地址（完整 URL）：")
+        if not ok or not url.strip():
+            return
+        if not re.match(r"^https?://", url.strip()):
+            QMessageBox.warning(self, "格式错误", "请输入以 http:// 或 https:// 开头的完整地址")
+            return
+
+        # 分类
+        cat, ok = QInputDialog.getItem(
+            self, "添加 RSS 源", "分类：",
+            ["AI 产业动态 (ai_industry)", "国际/国内大新闻 (news)"],
+            0, False,
+        )
+        if not ok:
+            return
+        cat_key = "ai_industry" if "ai_industry" in cat else "news"
+
+        # 保存到临时列表
+        entry = {"name": name.strip(), "url": url.strip(), "category": cat_key}
+        self.config.custom_rss.append(entry)
+        self._refresh_rss_list()
+
+    def _del_rss(self):
+        """删除选中的 RSS 条目。"""
+        current = self.rss_list.currentItem()
+        if not current:
+            QMessageBox.information(self, "提示", "请先选择要删除的 RSS 源")
+            return
+        entry = current.data(Qt.ItemDataRole.UserRole)
+        if entry in self.config.custom_rss:
+            self.config.custom_rss.remove(entry)
+        self._refresh_rss_list()
 
     def _save(self):
         # 刷新间隔

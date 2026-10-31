@@ -83,6 +83,12 @@
         var summary = this.querySelector('.card-summary');
         if (summary) summary.classList.remove('visible');
       });
+      card.addEventListener('click', function(e) {
+        var url = this.getAttribute('data-url');
+        if (url && backend) {
+          backend.openUrl(url);
+        }
+      });
     });
   }
 

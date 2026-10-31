@@ -23,8 +23,17 @@ class RssFetcher(Fetcher):
         self.exclude_keywords = exclude_keywords or EXCLUDE_PATTERNS
 
     async def fetch(self, db: Database) -> list[Item]:
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(self.url)
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+            response = await client.get(
+                self.url,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/125.0.0.0 Safari/537.36"
+                    ),
+                },
+            )
             response.raise_for_status()
         feed = feedparser.parse(response.text)
         new_items = []

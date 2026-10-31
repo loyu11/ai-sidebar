@@ -39,6 +39,7 @@ def create_default_fetchers(config: Config) -> list:
     industry_feeds = [
         ("机器之心", "https://www.jiqizhixin.com/rss"),
         ("量子位", "https://www.qbitai.com/feed"),
+        ("36氪", "https://36kr.com/feed"),
     ]
     for name, url in industry_feeds:
         fetchers.append(RssFetcher(
@@ -49,7 +50,8 @@ def create_default_fetchers(config: Config) -> list:
 
     # 大新闻 RSS
     news_feeds = [
-        ("新华社", "http://www.xinhuanet.com/politics/xhll.xml"),
+        ("人民网", "http://www.people.com.cn/rss/politics.xml"),
+        ("环球网", "https://www.huanqiu.com/rss/china.xml"),
     ]
     for name, url in news_feeds:
         fetchers.append(RssFetcher(
@@ -58,6 +60,18 @@ def create_default_fetchers(config: Config) -> list:
             category="news",
             exclude_keywords=["娱乐", "体育", "八卦", "恋情", "综艺", "选秀", "真人秀", "足球", "篮球"],
         ))
+
+    # 用户自定义 RSS
+    for entry in config.custom_rss:
+        name = entry.get("name", "").strip()
+        url = entry.get("url", "").strip()
+        category = entry.get("category", "ai_industry")
+        if name and url and category in ("ai_industry", "news"):
+            fetchers.append(RssFetcher(
+                name=name,
+                url=url,
+                category=category,
+            ))
 
     return fetchers
 

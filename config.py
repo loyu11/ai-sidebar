@@ -28,6 +28,7 @@ class Config:
     enable_summary: bool = True
     api_key: str = ""
     model: str = "deepseek-chat"
+    custom_rss: list[dict] = field(default_factory=list)
 
     @staticmethod
     def default_path() -> Path:
